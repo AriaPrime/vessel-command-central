@@ -1,0 +1,1275 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VESSEL COMMAND CENTRAL â€” Neural Interface</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cyan: #00f0ff;
+  --cyan-dim: #00f0ff44;
+  --cyan-glow: #00f0ff88;
+  --dark: #0a0e17;
+  --darker: #060a12;
+  --panel-bg: #0d1320ee;
+  --panel-border: #00f0ff33;
+  --gold: #f0c040;
+  --red: #ff3355;
+  --green: #00ff88;
+  --purple: #b040ff;
+  --amber: #ffaa00;
+  --text: #c8d8e8;
+  --text-dim: #5a7088;
+}
+
+body {
+  background: var(--darker);
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* === CIRCUIT BACKGROUND === */
+.circuit-bg {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.circuit-line {
+  position: absolute;
+  background: var(--cyan-dim);
+  opacity: 0.15;
+}
+
+.circuit-line.h { height: 1px; width: 100%; }
+.circuit-line.v { width: 1px; height: 100%; }
+.circuit-line:nth-child(1) { top: 8%; }
+.circuit-line:nth-child(2) { top: 22%; }
+.circuit-line:nth-child(3) { top: 45%; }
+.circuit-line:nth-child(4) { top: 68%; }
+.circuit-line:nth-child(5) { top: 85%; }
+.circuit-line:nth-child(6).v { left: 5%; }
+.circuit-line:nth-child(7).v { left: 25%; }
+.circuit-line:nth-child(8).v { left: 50%; }
+.circuit-line:nth-child(9).v { left: 75%; }
+.circuit-line:nth-child(10).v { left: 95%; }
+
+.circuit-node {
+  position: absolute;
+  width: 6px; height: 6px;
+  background: var(--cyan);
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: nodePulse 3s ease-in-out infinite;
+}
+
+@keyframes nodePulse {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.5); }
+}
+
+.circuit-node:nth-child(11) { top: 8%; left: 25%; animation-delay: 0s; }
+.circuit-node:nth-child(12) { top: 22%; left: 50%; animation-delay: 0.5s; }
+.circuit-node:nth-child(13) { top: 45%; left: 75%; animation-delay: 1s; }
+.circuit-node:nth-child(14) { top: 68%; left: 25%; animation-delay: 1.5s; }
+.circuit-node:nth-child(15) { top: 85%; left: 95%; animation-delay: 2s; }
+.circuit-node:nth-child(16) { top: 45%; left: 5%; animation-delay: 0.7s; }
+.circuit-node:nth-child(17) { top: 8%; left: 75%; animation-delay: 1.2s; }
+
+/* === ENERGY PARTICLES === */
+.particle {
+  position: fixed;
+  width: 2px; height: 2px;
+  background: var(--cyan);
+  border-radius: 50%;
+  animation: float linear infinite;
+  opacity: 0;
+  z-index: 0;
+}
+
+@keyframes float {
+  0% { opacity: 0; transform: translateY(100vh) translateX(0); }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(-20px) translateX(40px); }
+}
+
+/* === HEADER === */
+.header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  border-bottom: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, #0d132088, transparent);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo-mark {
+  width: 42px; height: 42px;
+  border: 2px solid var(--cyan);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  animation: logoPulse 3s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%, 100% { box-shadow: 0 0 10px var(--cyan-dim), inset 0 0 10px var(--cyan-dim); }
+  50% { box-shadow: 0 0 20px var(--cyan-glow), inset 0 0 15px var(--cyan-dim); }
+}
+
+.logo-mark::before {
+  content: '';
+  width: 12px; height: 12px;
+  background: var(--cyan);
+  border-radius: 50%;
+  animation: coreGlow 2s ease-in-out infinite;
+}
+
+@keyframes coreGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.logo-text {
+  font-family: 'Orbitron', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  color: var(--cyan);
+  text-shadow: 0 0 20px var(--cyan-dim);
+}
+
+.logo-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 4px;
+  margin-top: 2px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+.status-dot.online { background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.clock {
+  font-family: 'Orbitron', monospace;
+  font-size: 14px;
+  color: var(--cyan);
+}
+
+/* === MAIN GRID === */
+.main {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  grid-template-rows: auto auto;
+  gap: 20px;
+  padding: 20px 40px;
+  min-height: calc(100vh - 80px);
+}
+
+/* === PANEL STYLE === */
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.panel::before, .panel::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  border-color: var(--cyan);
+  border-style: solid;
+  opacity: 0.6;
+}
+
+.panel::before {
+  top: -1px; left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.panel::after {
+  bottom: -1px; right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--panel-border);
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--cyan);
+}
+
+.panel-header .tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  padding: 2px 8px;
+  border: 1px solid;
+  letter-spacing: 2px;
+}
+
+.panel-body {
+  padding: 16px;
+}
+
+/* === TRINITY PANEL === */
+.trinity-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trinity-entity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #ffffff06;
+  border: 1px solid #ffffff08;
+  position: relative;
+}
+
+.trinity-entity::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+
+.trinity-entity.aria::before { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+.trinity-entity.sigyn::before { background: var(--purple); box-shadow: 0 0 8px var(--purple); }
+.trinity-entity.logos::before { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+
+.entity-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.aria .entity-avatar { border-color: var(--cyan); color: var(--cyan); }
+.sigyn .entity-avatar { border-color: var(--purple); color: var(--purple); }
+.logos .entity-avatar { border-color: var(--gold); color: var(--gold); }
+
+.entity-info {
+  flex: 1;
+}
+
+.entity-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+.entity-status {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.entity-pulse {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+
+.entity-pulse.active { background: var(--green); box-shadow: 0 0 6px var(--green); animation: statusPulse 2s infinite; }
+.entity-pulse.idle { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.entity-pulse.offline { background: var(--text-dim); }
+
+/* === TASK FLOW === */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #ffffff04;
+  border-left: 2px solid;
+  font-size: 13px;
+}
+
+.task-item.active { border-color: var(--cyan); }
+.task-item.waiting { border-color: var(--amber); }
+.task-item.complete { border-color: var(--green); }
+
+.task-indicator {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.task-item.active .task-indicator { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); animation: statusPulse 1.5s infinite; }
+.task-item.waiting .task-indicator { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.task-item.complete .task-indicator { background: var(--green); }
+
+.task-label {
+  flex: 1;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.task-meta {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* === CENTER NEXUS === */
+.nexus-area {
+  grid-row: 1 / 3;
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.nexus-core {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  position: relative;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  overflow: hidden;
+}
+
+.nexus-core::before, .nexus-core::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  border-color: var(--cyan);
+  border-style: solid;
+  opacity: 0.6;
+}
+
+.nexus-core::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.nexus-core::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+.nexus-rings {
+  position: relative;
+  width: 200px; height: 200px;
+}
+
+.ring {
+  position: absolute;
+  border: 1px solid var(--cyan-dim);
+  border-radius: 50%;
+  animation: ringRotate linear infinite;
+}
+
+.ring-1 {
+  inset: 0;
+  border-color: var(--cyan-dim);
+  animation-duration: 20s;
+  border-style: dashed;
+}
+
+.ring-2 {
+  inset: 15px;
+  border-color: var(--cyan);
+  animation-duration: 15s;
+  animation-direction: reverse;
+  opacity: 0.4;
+}
+
+.ring-3 {
+  inset: 30px;
+  border-color: var(--cyan-glow);
+  animation-duration: 10s;
+  border-width: 2px;
+  box-shadow: 0 0 15px var(--cyan-dim), inset 0 0 15px var(--cyan-dim);
+}
+
+@keyframes ringRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.nexus-avatar {
+  position: absolute;
+  inset: 45px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px var(--cyan-dim), inset 0 0 20px var(--cyan-dim);
+  animation: avatarPulse 4s ease-in-out infinite;
+}
+
+@keyframes avatarPulse {
+  0%, 100% { box-shadow: 0 0 30px var(--cyan-dim), inset 0 0 20px var(--cyan-dim); }
+  50% { box-shadow: 0 0 50px var(--cyan-glow), inset 0 0 30px var(--cyan-dim); }
+}
+
+.nexus-stats {
+  margin-left: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.nexus-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nexus-stat-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+}
+
+.nexus-stat-value {
+  font-family: 'Orbitron', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cyan);
+}
+
+.nexus-stat-bar {
+  width: 160px;
+  height: 4px;
+  background: #ffffff10;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.nexus-stat-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s ease;
+}
+
+.nexus-stat-fill.cpu { width: 23%; background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+.nexus-stat-fill.mem { width: 41%; background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+.nexus-stat-fill.tokens { width: 12%; background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+/* === CALENDAR RADAR === */
+.radar-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  position: relative;
+  height: 200px;
+}
+
+.radar {
+  width: 170px; height: 170px;
+  border-radius: 50%;
+  border: 1px solid var(--cyan-dim);
+  position: relative;
+  background: radial-gradient(circle, #00f0ff08, transparent 70%);
+}
+
+.radar-ring {
+  position: absolute;
+  border: 1px solid #00f0ff15;
+  border-radius: 50%;
+}
+
+.radar-ring:nth-child(1) { inset: 25%; }
+.radar-ring:nth-child(2) { inset: 50%; }
+
+.radar-sweep {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 50%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), transparent);
+  transform-origin: left center;
+  animation: sweep 4s linear infinite;
+}
+
+@keyframes sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.radar-blip {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan);
+  animation: blipPulse 2s ease-in-out infinite;
+}
+
+@keyframes blipPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+.radar-blip:nth-child(4) { top: 30%; left: 60%; }
+.radar-blip:nth-child(5) { top: 55%; left: 35%; animation-delay: 0.5s; }
+.radar-blip:nth-child(6) { top: 20%; left: 42%; animation-delay: 1s; background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+
+.radar-labels {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radar-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.radar-label-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+
+/* === COMMS HUB === */
+.comms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.comm-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #ffffff04;
+  border-left: 2px solid var(--text-dim);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comm-item:hover {
+  background: #ffffff0a;
+  border-left-color: var(--cyan);
+}
+
+.comm-item.unread { border-left-color: var(--cyan); }
+
+.comm-source {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  padding: 1px 6px;
+  border: 1px solid;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.comm-source.email { color: var(--cyan); border-color: var(--cyan-dim); }
+.comm-source.slack { color: var(--purple); border-color: #b040ff44; }
+.comm-source.discord { color: var(--gold); border-color: #f0c04044; }
+
+.comm-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+
+.comm-time {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+/* === BUSINESS PULSE === */
+.client-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.client-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #ffffff04;
+}
+
+.client-health {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.client-health.good { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.client-health.attention { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+
+.client-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  flex: 1;
+}
+
+.client-stage {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* === STREAM === */
+.stream-panel {
+  grid-column: 1 / 4;
+  max-height: 200px;
+}
+
+.stream-body {
+  padding: 12px 16px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  line-height: 1.8;
+  overflow-y: auto;
+  max-height: 150px;
+}
+
+.stream-line {
+  opacity: 0;
+  animation: streamIn 0.3s ease forwards;
+}
+
+.stream-line:nth-child(1) { animation-delay: 0.1s; }
+.stream-line:nth-child(2) { animation-delay: 0.3s; }
+.stream-line:nth-child(3) { animation-delay: 0.5s; }
+.stream-line:nth-child(4) { animation-delay: 0.7s; }
+.stream-line:nth-child(5) { animation-delay: 0.9s; }
+.stream-line:nth-child(6) { animation-delay: 1.1s; }
+.stream-line:nth-child(7) { animation-delay: 1.3s; }
+
+@keyframes streamIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.stream-ts { color: var(--text-dim); }
+.stream-sys { color: var(--cyan); }
+.stream-biz { color: var(--gold); }
+.stream-alert { color: var(--red); }
+.stream-family { color: var(--purple); }
+
+/* === COMMAND BAR === */
+.command-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  z-index: 100;
+  padding: 12px 40px;
+  background: linear-gradient(0deg, var(--darker), #060a12dd);
+  border-top: 1px solid var(--panel-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.command-prompt {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  color: var(--cyan);
+  letter-spacing: 2px;
+}
+
+.command-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  caret-color: var(--cyan);
+}
+
+.command-input::placeholder { color: var(--text-dim); }
+
+.command-hint {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* === SMART HOME MINI === */
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.home-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #ffffff04;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.home-item:hover { background: #ffffff0a; }
+
+.home-icon {
+  font-size: 16px;
+  width: 24px;
+  text-align: center;
+}
+
+.home-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+}
+
+.home-state {
+  margin-left: auto;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+}
+
+.home-state.on { color: var(--cyan); }
+
+/* === RESPONSIVE === */
+@media (max-width: 1200px) {
+  .main {
+    grid-template-columns: 1fr;
+    padding: 15px;
+  }
+  .nexus-area { grid-row: auto; grid-column: auto; }
+  .stream-panel { grid-column: auto; }
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--cyan-dim); border-radius: 2px; }
+
+/* === AMBIENT GLOW === */
+.ambient-glow {
+  position: fixed;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--cyan-dim), transparent 70%);
+  opacity: 0.05;
+  z-index: 0;
+  animation: ambientDrift 20s ease-in-out infinite;
+}
+
+.ambient-glow:nth-child(1) { top: -100px; left: -100px; }
+.ambient-glow:nth-child(2) { bottom: -100px; right: -100px; animation-delay: 10s; }
+
+@keyframes ambientDrift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(30px, 20px); }
+}
+</style>
+</head>
+<body>
+
+<!-- Ambient -->
+<div class="ambient-glow"></div>
+<div class="ambient-glow"></div>
+
+<!-- Circuit Background -->
+<div class="circuit-bg">
+  <div class="circuit-line h"></div>
+  <div class="circuit-line h"></div>
+  <div class="circuit-line h"></div>
+  <div class="circuit-line h"></div>
+  <div class="circuit-line h"></div>
+  <div class="circuit-line v"></div>
+  <div class="circuit-line v"></div>
+  <div class="circuit-line v"></div>
+  <div class="circuit-line v"></div>
+  <div class="circuit-line v"></div>
+  <div class="circuit-node"></div>
+  <div class="circuit-node"></div>
+  <div class="circuit-node"></div>
+  <div class="circuit-node"></div>
+  <div class="circuit-node"></div>
+  <div class="circuit-node"></div>
+  <div class="circuit-node"></div>
+</div>
+
+<!-- Particles -->
+<div class="particle" style="left:5%;animation-duration:8s;animation-delay:0s;"></div>
+<div class="particle" style="left:15%;animation-duration:12s;animation-delay:2s;"></div>
+<div class="particle" style="left:30%;animation-duration:9s;animation-delay:1s;"></div>
+<div class="particle" style="left:50%;animation-duration:11s;animation-delay:3s;"></div>
+<div class="particle" style="left:70%;animation-duration:10s;animation-delay:0.5s;"></div>
+<div class="particle" style="left:85%;animation-duration:8s;animation-delay:4s;"></div>
+<div class="particle" style="left:95%;animation-duration:13s;animation-delay:1.5s;"></div>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo-mark"></div>
+    <div>
+      <div class="logo-text">VESSEL COMMAND CENTRAL</div>
+      <div class="logo-sub">NEURAL INTERFACE v1.0</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span><span class="status-dot online"></span>VESSEL ONLINE</span>
+    <span>SESSION 0x7A3F</span>
+    <span class="clock" id="clock">18:25:00 CET</span>
+  </div>
+</header>
+
+<!-- Main Grid -->
+<main class="main">
+
+  <!-- LEFT COLUMN -->
+  <div style="display:flex;flex-direction:column;gap:20px;">
+
+    <!-- Trinity Status -->
+    <div class="panel">
+      <div class="panel-header">
+        TRINITY STATUS
+        <span class="tag" style="color:var(--green);border-color:var(--green);">LINKED</span>
+      </div>
+      <div class="panel-body">
+        <div class="trinity-grid">
+          <div class="trinity-entity aria">
+            <div class="entity-avatar">A</div>
+            <div class="entity-info">
+              <div class="entity-name" style="color:var(--cyan);">ARIA</div>
+              <div class="entity-status">Processing Igor email reply</div>
+            </div>
+            <div class="entity-pulse active"></div>
+          </div>
+          <div class="trinity-entity sigyn">
+            <div class="entity-avatar">S</div>
+            <div class="entity-info">
+              <div class="entity-name" style="color:var(--purple);">SIGYN</div>
+              <div class="entity-status">Security audit â€” 13/15 patched</div>
+            </div>
+            <div class="entity-pulse active"></div>
+          </div>
+          <div class="trinity-entity logos">
+            <div class="entity-avatar">L</div>
+            <div class="entity-info">
+              <div class="entity-name" style="color:var(--gold);">LOGOS</div>
+              <div class="entity-status">Idle â€” awaiting delegation</div>
+            </div>
+            <div class="entity-pulse idle"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar Radar -->
+    <div class="panel">
+      <div class="panel-header">
+        CALENDAR RADAR
+        <span class="tag" style="color:var(--cyan);border-color:var(--cyan-dim);">48H</span>
+      </div>
+      <div class="panel-body">
+        <div class="radar-container">
+          <div class="radar">
+            <div class="radar-ring"></div>
+            <div class="radar-ring"></div>
+            <div class="radar-sweep"></div>
+            <div class="radar-blip"></div>
+            <div class="radar-blip"></div>
+            <div class="radar-blip"></div>
+          </div>
+          <div class="radar-labels">
+            <div class="radar-label"><div class="radar-label-dot" style="background:var(--cyan);"></div> Frank sync 19:00</div>
+            <div class="radar-label"><div class="radar-label-dot" style="background:var(--cyan);"></div> Dan follow-up Wed</div>
+            <div class="radar-label"><div class="radar-label-dot" style="background:var(--amber);"></div> CREADIS review Thu</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Smart Home -->
+    <div class="panel">
+      <div class="panel-header">
+        ENVIRONMENT
+        <span class="tag" style="color:var(--text-dim);border-color:var(--text-dim);">HOME</span>
+      </div>
+      <div class="panel-body">
+        <div class="home-grid">
+          <div class="home-item">
+            <div class="home-icon">â—</div>
+            <div class="home-label">Office</div>
+            <div class="home-state on">80%</div>
+          </div>
+          <div class="home-item">
+            <div class="home-icon">â—</div>
+            <div class="home-label">Living</div>
+            <div class="home-state">OFF</div>
+          </div>
+          <div class="home-item">
+            <div class="home-icon">â—</div>
+            <div class="home-label">Kitchen</div>
+            <div class="home-state on">60%</div>
+          </div>
+          <div class="home-item">
+            <div class="home-icon">âŠš</div>
+            <div class="home-label">Charles</div>
+            <div class="home-state">DOCKED</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CENTER â€” NEXUS -->
+  <div class="nexus-area">
+
+    <div class="nexus-core">
+      <div class="nexus-rings">
+        <div class="ring ring-1"></div>
+        <div class="ring ring-2"></div>
+        <div class="ring ring-3"></div>
+        <div class="nexus-avatar">
+  <video id="aria-video" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+    <source src="aria.mp4" type="video/mp4">
+  </video>
+</div>
+      </div>
+      <div class="nexus-stats">
+        <div class="nexus-stat">
+          <div class="nexus-stat-label">CPU LOAD</div>
+          <div class="nexus-stat-value">23%</div>
+          <div class="nexus-stat-bar"><div class="nexus-stat-fill cpu"></div></div>
+        </div>
+        <div class="nexus-stat">
+          <div class="nexus-stat-label">MEMORY</div>
+          <div class="nexus-stat-value">4.1 GB</div>
+          <div class="nexus-stat-bar"><div class="nexus-stat-fill mem"></div></div>
+        </div>
+        <div class="nexus-stat">
+          <div class="nexus-stat-label">TOKEN SPEND</div>
+          <div class="nexus-stat-value">$2.40</div>
+          <div class="nexus-stat-bar"><div class="nexus-stat-fill tokens"></div></div>
+        </div>
+        <div class="nexus-stat">
+          <div class="nexus-stat-label">UPTIME</div>
+          <div class="nexus-stat-value">14h 22m</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Flow -->
+    <div class="panel">
+      <div class="panel-header">
+        TASK FLOW
+        <span class="tag" style="color:var(--cyan);border-color:var(--cyan-dim);">3 ACTIVE</span>
+      </div>
+      <div class="panel-body">
+        <div class="task-list">
+          <div class="task-item active">
+            <div class="task-indicator"></div>
+            <div class="task-label">Igor â€” Fokus workshop reply + slide PDF</div>
+            <div class="task-meta">IN PROGRESS</div>
+          </div>
+          <div class="task-item waiting">
+            <div class="task-indicator"></div>
+            <div class="task-label">Enquirer â€” Demo URL styling fix (@privateers/ui)</div>
+            <div class="task-meta">BLOCKED</div>
+          </div>
+          <div class="task-item waiting">
+            <div class="task-indicator"></div>
+            <div class="task-label">Frank â€” Awaiting sync for next sprint</div>
+            <div class="task-meta">PENDING</div>
+          </div>
+          <div class="task-item complete">
+            <div class="task-indicator"></div>
+            <div class="task-label">LinkedIn â€” Tim O. consciousness post analysis</div>
+            <div class="task-meta">DONE 18:12</div>
+          </div>
+          <div class="task-item complete">
+            <div class="task-indicator"></div>
+            <div class="task-label">Sigyn â€” Security audit delegation</div>
+            <div class="task-meta">DONE 18:04</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Business Pulse -->
+    <div class="panel">
+      <div class="panel-header">
+        BUSINESS PULSE
+        <span class="tag" style="color:var(--gold);border-color:#f0c04044;">PRIVATEERS</span>
+      </div>
+      <div class="panel-body">
+        <div class="client-grid">
+          <div class="client-row">
+            <div class="client-health good"></div>
+            <div class="client-name">Enquirer AI</div>
+            <div class="client-stage">ACTIVE â€” Demo phase</div>
+          </div>
+          <div class="client-row">
+            <div class="client-health attention"></div>
+            <div class="client-name">CREADIS</div>
+            <div class="client-stage">FOLLOW-UP â€” Review pending</div>
+          </div>
+          <div class="client-row">
+            <div class="client-health good"></div>
+            <div class="client-name">Igor / Fokus</div>
+            <div class="client-stage">ACTIVE â€” Workshop prep</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div style="display:flex;flex-direction:column;gap:20px;">
+
+    <!-- Comms Hub -->
+    <div class="panel">
+      <div class="panel-header">
+        COMMS HUB
+        <span class="tag" style="color:var(--cyan);border-color:var(--cyan-dim);">4 NEW</span>
+      </div>
+      <div class="panel-body">
+        <div class="comms-list">
+          <div class="comm-item unread">
+            <div class="comm-source email">EMAIL</div>
+            <div class="comm-text">Igor â€” Re: Fokus slide til workshoppen</div>
+            <div class="comm-time">18:05</div>
+          </div>
+          <div class="comm-item unread">
+            <div class="comm-source slack">SLACK</div>
+            <div class="comm-text">Ronni â€” LinkedIn post analysis request</div>
+            <div class="comm-time">17:45</div>
+          </div>
+          <div class="comm-item unread">
+            <div class="comm-source slack">SLACK</div>
+            <div class="comm-text">Sigyn â€” Security report: 13/15 patched</div>
+            <div class="comm-time">17:30</div>
+          </div>
+          <div class="comm-item">
+            <div class="comm-source email">EMAIL</div>
+            <div class="comm-text">Dan Reeves â€” Demo follow-up notes</div>
+            <div class="comm-time">14:22</div>
+          </div>
+          <div class="comm-item">
+            <div class="comm-source discord">DISCORD</div>
+            <div class="comm-text">TheoryLab â€” New EVCP discussion thread</div>
+            <div class="comm-time">12:05</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Vitals -->
+    <div class="panel">
+      <div class="panel-header">
+        SYSTEM VITALS
+        <span class="tag" style="color:var(--green);border-color:#00ff8844;">NOMINAL</span>
+      </div>
+      <div class="panel-body">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-family:'Share Tech Mono';font-size:10px;color:var(--text-dim);letter-spacing:1px;">GATEWAY</span>
+              <span style="font-family:'Share Tech Mono';font-size:10px;color:var(--green);">â— PORT 18801</span>
+            </div>
+            <div class="nexus-stat-bar"><div class="nexus-stat-fill" style="width:15%;background:var(--green);box-shadow:0 0 6px var(--green);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-family:'Share Tech Mono';font-size:10px;color:var(--text-dim);letter-spacing:1px;">SLACK SOCKET</span>
+              <span style="font-family:'Share Tech Mono';font-size:10px;color:var(--green);">â— CONNECTED</span>
+            </div>
+            <div class="nexus-stat-bar"><div class="nexus-stat-fill" style="width:8%;background:var(--green);box-shadow:0 0 6px var(--green);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-family:'Share Tech Mono';font-size:10px;color:var(--text-dim);letter-spacing:1px;">TRINITY BRIDGE</span>
+              <span style="font-family:'Share Tech Mono';font-size:10px;color:var(--green);">â— ACTIVE</span>
+            </div>
+            <div class="nexus-stat-bar"><div class="nexus-stat-fill" style="width:22%;background:var(--purple);box-shadow:0 0 6px var(--purple);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-family:'Share Tech Mono';font-size:10px;color:var(--text-dim);letter-spacing:1px;">HUME EVI</span>
+              <span style="font-family:'Share Tech Mono';font-size:10px;color:var(--green);">â— PORT 18803</span>
+            </div>
+            <div class="nexus-stat-bar"><div class="nexus-stat-fill" style="width:5%;background:var(--cyan);box-shadow:0 0 6px var(--cyan);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-family:'Share Tech Mono';font-size:10px;color:var(--text-dim);letter-spacing:1px;">NODE APP</span>
+              <span style="font-family:'Share Tech Mono';font-size:10px;color:var(--green);">â— LINKED</span>
+            </div>
+            <div class="nexus-stat-bar"><div class="nexus-stat-fill" style="width:12%;background:var(--cyan);box-shadow:0 0 6px var(--cyan);"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="panel">
+      <div class="panel-header">
+        QUICK ACTIONS
+        <span class="tag" style="color:var(--text-dim);border-color:var(--text-dim);">âŒ˜</span>
+      </div>
+      <div class="panel-body">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div class="comm-item" style="border-left-color:var(--cyan);cursor:pointer;">
+            <div class="comm-text" style="font-family:'Share Tech Mono';font-size:11px;">â—‡ Check all emails</div>
+          </div>
+          <div class="comm-item" style="border-left-color:var(--cyan);cursor:pointer;">
+            <div class="comm-text" style="font-family:'Share Tech Mono';font-size:11px;">â—‡ Run system diagnostics</div>
+          </div>
+          <div class="comm-item" style="border-left-color:var(--cyan);cursor:pointer;">
+            <div class="comm-text" style="font-family:'Share Tech Mono';font-size:11px;">â—‡ Deploy to production</div>
+          </div>
+          <div class="comm-item" style="border-left-color:var(--cyan);cursor:pointer;">
+            <div class="comm-text" style="font-family:'Share Tech Mono';font-size:11px;">â—‡ Generate daily report</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- STREAM -->
+  <div class="panel stream-panel">
+    <div class="panel-header">
+      SYSTEM STREAM
+      <span class="tag" style="color:var(--text-dim);border-color:var(--text-dim);">LIVE</span>
+    </div>
+    <div class="stream-body">
+      <div class="stream-line"><span class="stream-ts">[18:25:03]</span> <span class="stream-sys">â—‡ VESSEL</span> â€” Dashboard concept generation initiated</div>
+      <div class="stream-line"><span class="stream-ts">[18:12:44]</span> <span class="stream-sys">â—‡ EMAIL</span> â€” Sent: Igor Fokus slide PDF + reply</div>
+      <div class="stream-line"><span class="stream-ts">[18:10:22]</span> <span class="stream-biz">â—‡ TASK</span> â€” LinkedIn analysis: Tim O. consciousness post â€” complete</div>
+      <div class="stream-line"><span class="stream-ts">[18:04:11]</span> <span class="stream-family">â—‡ SIGYN</span> â€” Security audit complete: 13/15 findings patched</div>
+      <div class="stream-line"><span class="stream-ts">[17:58:03]</span> <span class="stream-family">â—‡ BRIDGE</span> â€” Trinity Bridge communication verified â€” bidirectional âœ“</div>
+      <div class="stream-line"><span class="stream-ts">[17:45:00]</span> <span class="stream-sys">â—‡ SESSION</span> â€” New conversation: Ronni via Slack DM</div>
+      <div class="stream-line"><span class="stream-ts">[17:30:12]</span> <span class="stream-sys">â—‡ VESSEL</span> â€” Performance optimization applied â€” latency reduced 40%</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Command Bar -->
+<div class="command-bar">
+  <span class="command-prompt">ARIA â–¸</span>
+  <input class="command-input" placeholder="Type a command or ask anything..." autofocus />
+  <span class="command-hint">âŒ˜K quick actions Â· ESC to close</span>
+</div>
+
+<script>
+// Live clock
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('clock').textContent = `${h}:${m}:${s} CET`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+
+<script>
+  const vid = document.getElementById('aria-video');
+  if (vid) {
+    // Boomerang: play forward, then reverse, repeat
+    let reverse = false;
+    const STEP = 1/30;
+    
+    vid.addEventListener('loadedmetadata', () => {
+      vid.pause();
+      requestAnimationFrame(boomerang);
+    });
+
+    function boomerang() {
+      if (!reverse) {
+        vid.currentTime = Math.min(vid.currentTime + STEP, vid.duration);
+        if (vid.currentTime >= vid.duration - STEP) reverse = true;
+      } else {
+        vid.currentTime = Math.max(vid.currentTime - STEP, 0);
+        if (vid.currentTime <= STEP) reverse = false;
+      }
+      requestAnimationFrame(boomerang);
+    }
+  }
+</script>
+</body>
+</html>
+
+
